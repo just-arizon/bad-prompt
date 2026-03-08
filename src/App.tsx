@@ -7,7 +7,6 @@ function App() {
   return (
    <>
      <PromptOptimizer />  
-     <div className="">HEllo</div>
    </>
   )
 }
