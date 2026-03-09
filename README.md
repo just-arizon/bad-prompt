@@ -1,73 +1,54 @@
-# React + TypeScript + Vite
+# Frontend Structure
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── styles/
+│   └── globals.css          # CSS variables, base styles, shared classes
+│
+├── context/
+│   └── AuthContext.jsx      # Global user state: session, plan, usage count
+│
+├── hooks/
+│   └── useAnalyze.js        # Analyze API call + loading/error/result state
+│
+├── components/
+│   ├── Navbar.jsx           # Top nav: logo, plan chip, usage count, auth links
+│   └── UpgradeGate.jsx      # Shown when free user hits daily limit
+│
+├── pages/
+│   ├── HomePage.jsx         # Main analyzer UI
+│   ├── LoginPage.jsx        # Sign in form
+│   ├── SignupPage.jsx       # Sign up form
+│   └── UpgradePage.jsx      # Pricing page with Stripe link
+│
+└── App.jsx                  # Router + AuthProvider wrapper
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Install dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install react-router-dom
 ```
+
+## Environment variable
+
+Create a `.env` file in your React project root:
+
+```
+VITE_API_BASE_URL=http://localhost:3001
+```
+
+## How auth flow works
+
+1. User signs up → POST /api/auth/signup → receives JWT token
+2. Token stored in localStorage
+3. AuthContext reads token on mount → fetches /api/auth/me → sets user state
+4. Every API call attaches token as `Authorization: Bearer <token>`
+5. Backend verifies token, checks plan, checks usage count
+
+## How plan gating works
+
+- `AuthContext` exposes `atLimit` (boolean)
+- `HomePage` shows `<UpgradeGate />` instead of the input when `atLimit === true`
+- `Navbar` shows usage count and Upgrade button for free users
+- After upgrade via Stripe, backend webhook sets `user.plan = "paid"` in DB
