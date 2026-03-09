@@ -23,12 +23,14 @@ body {
   color: var(--text);
   font-family: var(--font-mono);
   -webkit-font-smoothing: antialiased;
+  width: 100%;
 }
 
 a { color: inherit; text-decoration: none; }
 
 /* Shared layout */
 .page {
+  width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

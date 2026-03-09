@@ -7,7 +7,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);   // { id, email, plan, usageCount, usageLimit }
+  const [user, setUser] = useState(null);   // { id, email, plan, usageCount, usageLimit }
   const [loading, setLoading] = useState(true);
 
   // On mount, check if a session token exists and fetch the user

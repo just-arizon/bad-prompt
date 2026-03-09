@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 const styles = `
   .navbar {
-    width: 100%;
     border-bottom: 1px solid var(--border);
     background: var(--bg);
     position: sticky;
