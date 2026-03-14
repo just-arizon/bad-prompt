@@ -84,7 +84,8 @@ export default function LoginPage() {
       await login(email, password);
       navigate("/");
     } catch (e) {
-      setError(e.message);
+      const err = e as Error;
+      setError(err.message);
     } finally {
       setLoading(false);
     }

@@ -10,9 +10,9 @@ export function useAnalyze() {
   const { incrementUsage } = useAuth();
   const [result, setResult]   = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const analyze = useCallback(async (prompt) => {
+  const analyze = useCallback(async (prompt: string) => {
     if (!prompt?.trim()) return;
     setLoading(true);
     setError(null);
@@ -38,7 +38,8 @@ export function useAnalyze() {
       setResult(data);
       incrementUsage();
     } catch (e) {
-      setError(e.message || "Something went wrong.");
+      const err = e as Error 
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }

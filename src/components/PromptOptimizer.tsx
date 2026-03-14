@@ -26,7 +26,7 @@ const scoreColor = (val: number) => {
 // Points to your Express backend — update for production
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
-async function analyzePrompt(userPrompt) {
+async function analyzePrompt(userPrompt: string) {
   const response = await fetch(`${API_BASE}/api/analyze-prompt`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -56,7 +56,7 @@ interface AnalysisResult {
   const [input, setInput] = useState("");
 const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleAnalyze = useCallback(async () => {

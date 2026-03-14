@@ -1,16 +1,38 @@
-// src/context/AuthContext.jsx
-// Manages user session, plan, and usage count globally.
-// In production, replace the mock with real API calls to your backend.
+// src/context/AuthContext.tsx
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-import { createContext, useContext, useState, useEffect } from "react";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
-const AuthContext = createContext(null);
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface User {
+  id: string;
+  email: string;
+  plan: "free" | "paid";
+  usageCount: number;
+  usageLimit: number;
+}
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);   // { id, email, plan, usageCount, usageLimit }
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  isLoggedIn: boolean;
+  isPaid: boolean;
+  usageLeft: number;
+  atLimit: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  incrementUsage: () => void;
+}
+
+// ── Context ───────────────────────────────────────────────────────────────────
+const AuthContext = createContext<AuthContextType | null>(null);
+
+// ── Provider ──────────────────────────────────────────────────────────────────
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser]       = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // On mount, check if a session token exists and fetch the user
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -20,9 +42,9 @@ export function AuthProvider({ children }) {
     fetchMe(token).finally(() => setLoading(false));
   }, []);
 
-  async function fetchMe(token) {
+  async function fetchMe(token: string) {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:3001"}/api/auth/me`, {
+      const res = await fetch(`${API_BASE}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Invalid session");
@@ -34,8 +56,8 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function login(email, password) {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:3001"}/api/auth/login`, {
+  async function login(email: string, password: string) {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -46,8 +68,8 @@ export function AuthProvider({ children }) {
     setUser(data.user);
   }
 
-  async function signup(email, password) {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:3001"}/api/auth/signup`, {
+  async function signup(email: string, password: string) {
+    const res = await fetch(`${API_BASE}/api/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -63,15 +85,14 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  // Call this after a successful analysis to keep usage count in sync locally
   function incrementUsage() {
     setUser((prev) => prev ? { ...prev, usageCount: prev.usageCount + 1 } : prev);
   }
 
-  const isLoggedIn  = !!user;
-  const isPaid      = user?.plan === "paid";
-  const usageLeft   = user ? Math.max(0, user.usageLimit - user.usageCount) : 0;
-  const atLimit     = user?.plan === "free" && usageLeft <= 0;
+  const isLoggedIn = !!user;
+  const isPaid     = user?.plan === "paid";
+  const usageLeft  = user ? Math.max(0, user.usageLimit - user.usageCount) : 0;
+  const atLimit    = user?.plan === "free" && usageLeft <= 0;
 
   return (
     <AuthContext.Provider value={{
@@ -84,7 +105,8 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
+// Hook 
+export function useAuth(): AuthContextType {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
