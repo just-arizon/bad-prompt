@@ -43,8 +43,18 @@ async function analyzePrompt(userPrompt) {
 }
 
 export function PromptOptimizer() {
+
+interface AnalysisResult {
+  overallScore: number;
+  clarity: number;
+  specificity: number;
+  context: number;
+  issues: string[];
+  improvedPrompt: string;
+}
+
   const [input, setInput] = useState("");
-  const [result, setResult] = useState(null);
+const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -58,7 +68,8 @@ export function PromptOptimizer() {
       const data = await analyzePrompt(input.trim());
       setResult(data);
     } catch (e) {
-      setError(e.message || "Something went wrong. Check your API connection.");
+      const err = e as Error;
+      setError(err.message || "Something went wrong. Check your API connection.");
     } finally {
       setLoading(false);
     }
