@@ -53,7 +53,7 @@ const styles = `
 `;
 
 export default function Navbar() {
-  const { isLoggedIn, isPaid, user, usageLeft, logout } = useAuth();
+  const { isLoggedIn, isPaid, usageLeft, logout } = useAuth();
   const navigate = useNavigate();
 
   return (

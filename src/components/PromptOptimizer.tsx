@@ -17,7 +17,7 @@ const BAD_EXAMPLES = [
   "Give me ideas for my project",
 ];
 
-const scoreColor = (val) => {
+const scoreColor = (val: number) => {
   if (val <= 40) return { text: "color-bad", fill: "fill-bad" };
   if (val <= 70) return { text: "color-mid", fill: "fill-mid" };
   return { text: "color-good", fill: "fill-good" };
