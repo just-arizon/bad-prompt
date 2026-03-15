@@ -1,5 +1,11 @@
 // src/context/AuthContext.tsx
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
+import type { ReactNode } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
@@ -30,7 +36,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser]       = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -86,26 +92,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function incrementUsage() {
-    setUser((prev) => prev ? { ...prev, usageCount: prev.usageCount + 1 } : prev);
+    setUser((prev) =>
+      prev ? { ...prev, usageCount: prev.usageCount + 1 } : prev,
+    );
   }
 
   const isLoggedIn = !!user;
-  const isPaid     = user?.plan === "paid";
-  const usageLeft  = user ? Math.max(0, user.usageLimit - user.usageCount) : 0;
-  const atLimit    = user?.plan === "free" && usageLeft <= 0;
+  const isPaid = user?.plan === "paid";
+  const usageLeft = user ? Math.max(0, user.usageLimit - user.usageCount) : 0;
+  const atLimit = user?.plan === "free" && usageLeft <= 0;
 
   return (
-    <AuthContext.Provider value={{
-      user, loading,
-      isLoggedIn, isPaid, usageLeft, atLimit,
-      login, signup, logout, incrementUsage,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        isLoggedIn,
+        isPaid,
+        usageLeft,
+        atLimit,
+        login,
+        signup,
+        logout,
+        incrementUsage,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Hook 
+// Hook
 export function useAuth(): AuthContextType {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");

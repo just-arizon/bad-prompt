@@ -149,7 +149,8 @@ const styles = `
 `;
 
 export default function HomePage() {
-  const { atLimit, isLoggedIn } = useAuth();
+  
+  const { atLimit } = useAuth();
   const { result, loading, error, analyze, reset } = useAnalyze();
   const [input, setInput] = useState("");
   const [copied, setCopied] = useState(false);

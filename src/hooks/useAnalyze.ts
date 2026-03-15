@@ -1,16 +1,22 @@
-// src/hooks/useAnalyze.js
-// Encapsulates the analyze API call, loading, error, and result state.
-
 import { useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
+
+export interface AnalysisResult {
+  overallScore: number;
+  clarity: number;
+  specificity: number;
+  context: number;
+  issues: string[];
+  improvedPrompt: string;
+}
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
 export function useAnalyze() {
   const { incrementUsage } = useAuth();
-  const [result, setResult]   = useState(null);
+  const [result, setResult]   = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]     = useState<string | null>(null);
 
   const analyze = useCallback(async (prompt: string) => {
     if (!prompt?.trim()) return;
@@ -30,15 +36,12 @@ export function useAnalyze() {
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || `Server error: ${res.status}`);
-      }
+      if (!res.ok) throw new Error(data.error || `Server error: ${res.status}`);
 
       setResult(data);
       incrementUsage();
     } catch (e) {
-      const err = e as Error 
+      const err = e as Error;
       setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
