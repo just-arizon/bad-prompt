@@ -8,7 +8,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState(null);
+  const [error, setError]     = useState<string | null>(null);
   const [loading, setLoading]   = useState(false);
 
   async function handleSubmit() {
@@ -23,7 +23,8 @@ export default function SignupPage() {
       await signup(email, password);
       navigate("/");
     } catch (e) {
-      setError(e.message);
+      const err = e as Error;
+      setError(err.message);
     } finally {
       setLoading(false);
     }
