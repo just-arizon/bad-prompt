@@ -1,7 +1,4 @@
 // src/components/Navbar.jsx
-import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-
 const styles = `
   .navbar {
     border-bottom: 1px solid var(--border);
@@ -53,8 +50,7 @@ const styles = `
 `;
 
 export default function Navbar() {
-  const { isLoggedIn, isPaid, usageLeft, logout } = useAuth();
-  const navigate = useNavigate();
+
 
   return (
     <>
@@ -63,41 +59,6 @@ export default function Navbar() {
         <div className="navbar-inner">
           <div className="navbar-logo" onClick={() => navigate("/")}>
             bad<span>prompt</span>
-          </div>
-          <div className="navbar-right">
-            {isLoggedIn ? (
-              <>
-                {!isPaid && (
-                  <span className={`usage-text ${usageLeft <= 1 ? "low" : ""}`}>
-                    {usageLeft} left today
-                  </span>
-                )}
-                <span className={`plan-chip ${isPaid ? "paid" : ""}`}>
-                  {isPaid ? "Pro" : "Free"}
-                </span>
-                {!isPaid && (
-                  <button className="btn btn-primary" style={{ padding: "6px 14px", fontSize: "11px" }}
-                    onClick={() => navigate("/upgrade")}>
-                    Upgrade
-                  </button>
-                )}
-                <button className="btn btn-ghost" style={{ padding: "6px 14px", fontSize: "11px" }}
-                  onClick={logout}>
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="btn btn-ghost" style={{ padding: "6px 14px", fontSize: "11px" }}
-                  onClick={() => navigate("/login")}>
-                  Log in
-                </button>
-                <button className="btn btn-primary" style={{ padding: "6px 14px", fontSize: "11px" }}
-                  onClick={() => navigate("/signup")}>
-                  Sign up
-                </button>
-              </>
-            )}
           </div>
         </div>
       </nav>

@@ -1,8 +1,5 @@
-// src/pages/HomePage.jsx
+// src/pages/HomePage.tsx
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useAnalyze } from "../hooks/useAnalyze";
-import UpgradeGate from "../components/upgradeGate";
 
 const BAD_EXAMPLES = [
   "Write me a story",
@@ -12,11 +9,33 @@ const BAD_EXAMPLES = [
   "Give me ideas for my project",
 ];
 
+interface AnalysisResult {
+  overallScore: number;
+  clarity: number;
+  specificity: number;
+  context: number;
+  issues: string[];
+  improvedPrompt: string;
+}
+
 const scoreColor = (val: number) => {
   if (val <= 40) return { text: "color-bad", fill: "fill-bad" };
   if (val <= 70) return { text: "color-mid", fill: "fill-mid" };
   return { text: "color-good", fill: "fill-good" };
 };
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+
+async function analyzePrompt(prompt: string): Promise<AnalysisResult> {
+  const res = await fetch(`${API_BASE}/api/analyze-prompt`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `Server error: ${res.status}`);
+  return data;
+}
 
 const styles = `
   .home-header {
@@ -149,17 +168,32 @@ const styles = `
 `;
 
 export default function HomePage() {
-  
-  const { atLimit } = useAuth();
-  const { result, loading, error, analyze, reset } = useAnalyze();
-  const [input, setInput] = useState("");
+  const [input, setInput]   = useState("");
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]   = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const handleAnalyze = () => analyze(input);
+  const handleAnalyze = async () => {
+    if (!input.trim()) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const data = await analyzePrompt(input.trim());
+      setResult(data);
+    } catch (e) {
+      const err = e as Error;
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleClear = () => {
     setInput("");
-    reset();
+    setResult(null);
+    setError(null);
   };
 
   const handleCopy = () => {
@@ -174,7 +208,6 @@ export default function HomePage() {
     <>
       <style>{styles}</style>
       <div className="page">
-        {/* Header */}
         <div className="home-header">
           <div className="badge">Prompt Intelligence</div>
           <h1>Stop writing<br /><span>bad prompts.</span></h1>
@@ -184,34 +217,27 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Upgrade gate if free user hit limit */}
-        {atLimit && <UpgradeGate />}
-
-        {/* Input */}
-        {!atLimit && (
-          <div className="card container">
-            <div className="label">Your Prompt</div>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="e.g. write me a story about a robot..."
-              onKeyDown={(e) => {
-                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleAnalyze();
-              }}
-            />
-            <div className="actions">
-              <span className="char-count">{input.length} chars · ⌘↵ to analyze</span>
-              {result && <button className="btn btn-ghost" onClick={handleClear}>Clear</button>}
-              <button className="btn btn-primary" onClick={handleAnalyze}
-                disabled={!input.trim() || loading}>
-                {loading ? "Analyzing…" : "Analyze →"}
-              </button>
-            </div>
+        <div className="card container">
+          <div className="label">Your Prompt</div>
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="e.g. write me a story about a robot..."
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleAnalyze();
+            }}
+          />
+          <div className="actions">
+            <span className="char-count">{input.length} chars · ⌘↵ to analyze</span>
+            {result && <button className="btn btn-ghost" onClick={handleClear}>Clear</button>}
+            <button className="btn btn-primary" onClick={handleAnalyze}
+              disabled={!input.trim() || loading}>
+              {loading ? "Analyzing…" : "Analyze →"}
+            </button>
           </div>
-        )}
+        </div>
 
-        {/* Example pills */}
-        {!result && !loading && !atLimit && (
+        {!result && !loading && (
           <div className="examples">
             <div className="examples-label">Try a bad prompt →</div>
             <div className="example-pills">
@@ -222,7 +248,6 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Loading */}
         {loading && (
           <div className="card container">
             <div className="loading-state">
@@ -232,14 +257,12 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div className="container">
             <div className="error-box">⚠ {error}</div>
           </div>
         )}
 
-        {/* Results */}
         {result && (
           <div className="card container anim-slide">
             <div className="label">Quality Scores</div>
@@ -267,7 +290,7 @@ export default function HomePage() {
               <>
                 <div className="label">What's Wrong</div>
                 <div className="issues-list">
-                  {result.issues.map((issue, i) => (
+                  {result.issues.map((issue: string, i: number) => (
                     <div key={i} className="issue-item">
                       <span className="issue-icon">↳</span>
                       <span className="issue-text">{issue}</span>
