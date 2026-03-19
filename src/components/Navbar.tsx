@@ -57,7 +57,7 @@ export default function Navbar() {
       <style>{styles}</style>
       <nav className="navbar">
         <div className="navbar-inner">
-          <div className="navbar-logo" onClick={() => navigate("/")}>
+          <div className="navbar-logo">
             bad<span>prompt</span>
           </div>
         </div>
