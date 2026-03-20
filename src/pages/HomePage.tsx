@@ -8,7 +8,11 @@ const BAD_EXAMPLES = [
   "Explain AI",
   "Give me ideas for my project",
 ];
-
+const GOOD_EXAMPLES = [
+  "Build a React landing page with hero and pricing",
+  "Summarize top 5 AI writing tool competitors",
+  "Write a pitch deck for a SaaS targeting small businesses.",
+];
 interface AnalysisResult {
   overallScore: number;
   clarity: number;
@@ -237,12 +241,25 @@ export default function HomePage() {
           </div>
         </div>
 
-        {!result && !loading && (
+       {!result && !loading && (
           <div className="examples">
             <div className="examples-label">Try a bad prompt →</div>
             <div className="example-pills">
               {BAD_EXAMPLES.map((ex) => (
-                <button key={ex} className="pill" onClick={() => setInput(ex)}>{ex}</button>
+                <button key={ex} className="pill" onClick={() => setInput(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
+
+            <div className="examples-label" style={{ marginTop: "16px" }}>
+              Try a good prompt →
+            </div>
+            <div className="example-pills">
+              {GOOD_EXAMPLES.map((ex) => (
+                <button key={ex} className="pill" onClick={() => setInput(ex)}>
+                  {ex}
+                </button>
               ))}
             </div>
           </div>

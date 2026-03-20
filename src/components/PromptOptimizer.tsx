@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import '../App.css'
 
 const GOOGLE_FONT_URL =
   "https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap";
@@ -15,6 +14,11 @@ const BAD_EXAMPLES = [
   "Make it better",
   "Explain AI",
   "Give me ideas for my project",
+];
+const GOOD_EXAMPLES = [
+  "Build a React landing page with hero and pricing",
+  "Summarize top 5 AI writing tool competitors",
+  "Write a pitch deck for a SaaS targeting small businesses.",
 ];
 
 const scoreColor = (val: number) => {
@@ -42,19 +46,20 @@ async function analyzePrompt(userPrompt: string) {
   return data;
 }
 
+  interface AnalysisResult {
+    overallScore: number;
+    clarity: number;
+    specificity: number;
+    context: number;
+    issues: string[];
+    improvedPrompt: string;
+  }
+
+
 export function PromptOptimizer() {
 
-interface AnalysisResult {
-  overallScore: number;
-  clarity: number;
-  specificity: number;
-  context: number;
-  issues: string[];
-  improvedPrompt: string;
-}
-
   const [input, setInput] = useState("");
-const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -69,7 +74,9 @@ const [result, setResult] = useState<AnalysisResult | null>(null);
       setResult(data);
     } catch (e) {
       const err = e as Error;
-      setError(err.message || "Something went wrong. Check your API connection.");
+      setError(
+        err.message || "Something went wrong. Check your API connection.",
+      );
     } finally {
       setLoading(false);
     }
@@ -96,11 +103,13 @@ const [result, setResult] = useState<AnalysisResult | null>(null);
         <div className="header">
           <div className="badge">Prompt Intelligence</div>
           <h1>
-            Stop writing<br />
+            Stop writing
+            <br />
             <span>bad prompts.</span>
           </h1>
           <p className="subtitle">
-            Paste any prompt. Get an instant quality score, diagnosis of what's wrong, and a rewritten version that actually works.
+            Paste any prompt. Get an instant quality score, diagnosis of what's
+            wrong, and a rewritten version that actually works.
           </p>
         </div>
 
@@ -112,11 +121,14 @@ const [result, setResult] = useState<AnalysisResult | null>(null);
             onChange={(e) => setInput(e.target.value)}
             placeholder="e.g. write me a story about a robot..."
             onKeyDown={(e) => {
-              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleAnalyze();
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
+                handleAnalyze();
             }}
           />
           <div className="actions">
-            <span className="char-count">{input.length} chars · ⌘↵ to analyze</span>
+            <span className="char-count">
+              {input.length} chars · ⌘↵ to analyze
+            </span>
             {result && (
               <button className="btn btn-ghost" onClick={handleClear}>
                 Clear
@@ -132,12 +144,23 @@ const [result, setResult] = useState<AnalysisResult | null>(null);
           </div>
         </div>
 
-        {/* Example bad prompts */}
+        {/* Example bad prompts and good prompts */}
         {!result && !loading && (
           <div className="examples">
             <div className="examples-label">Try a bad prompt →</div>
             <div className="example-pills">
               {BAD_EXAMPLES.map((ex) => (
+                <button key={ex} className="pill" onClick={() => setInput(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
+
+            <div className="examples-label" style={{ marginTop: "16px" }}>
+              Try a good prompt →
+            </div>
+            <div className="example-pills">
+              {GOOD_EXAMPLES.map((ex) => (
                 <button key={ex} className="pill" onClick={() => setInput(ex)}>
                   {ex}
                 </button>
@@ -211,7 +234,11 @@ const [result, setResult] = useState<AnalysisResult | null>(null);
             <div className="improved-prompt">{result.improvedPrompt}</div>
             <div className="copy-row">
               {copied && <span className="copy-success">✓ Copied</span>}
-              <button className="btn btn-primary" onClick={handleCopy} style={{ marginLeft: 12 }}>
+              <button
+                className="btn btn-primary"
+                onClick={handleCopy}
+                style={{ marginLeft: 12 }}
+              >
                 Copy Prompt
               </button>
             </div>
